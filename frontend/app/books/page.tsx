@@ -13,10 +13,12 @@ import {
   Modal,
 } from "@mui/material";
 import VisibilityIcon from "@mui/icons-material/Visibility";
+import EditIcon from "@mui/icons-material/Edit";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 type Book = {
   id: number;
@@ -27,11 +29,12 @@ type Book = {
 };
 
 const BookIndex = () => {
+  const router = useRouter();
   const [books, setBooks] = useState<Book[]>([]);
   const [selectedBookId, setSelectedBookId] = useState<number | null>(null);
 
   useEffect(() => {
-    fetch("http://localhost:3000/books")  // Book全件取得のRailsのAPIを叩いている
+    fetch("http://localhost:3000/books") // APIから本を取得
       .then((res) => res.json())
       .then((books) => setBooks(books));
   }, []);
@@ -41,7 +44,7 @@ const BookIndex = () => {
   const handleShowDetails = (id?: number) => setSelectedBookId(id || null);
 
   const deleteBook = async (id: number) => {
-    await axios.delete(`http://localhost:3000/books/${id}`); // 指定したBookを削除するRailsのAPIを叩いている
+    await axios.delete(`http://localhost:3000/books/${id}`);
     setBooks(books.filter((book) => book.id !== id));
   };
 
@@ -50,13 +53,21 @@ const BookIndex = () => {
       <Typography variant="h4" align="center">
         Book List
       </Typography>
+      <Button
+        variant="contained"
+        color="success"
+        onClick={() => router.push("/books/new")}
+        sx={{ marginBottom: 2 }}
+      >
+        Create New Book
+      </Button>
       <TableContainer>
         <Table sx={{ maxWidth: 650 }} align="center">
           <TableHead>
             <TableRow>
               <TableCell>Title</TableCell>
               <TableCell>Body</TableCell>
-              <TableCell colSpan={2}></TableCell>
+              <TableCell colSpan={3}></TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -79,6 +90,17 @@ const BookIndex = () => {
                   <TableCell>
                     <Button
                       variant="contained"
+                      color="warning"
+                      size="small"
+                      startIcon={<EditIcon />}
+                      onClick={() => router.push(`/books/${book.id}/edit`)}
+                    >
+                      EDIT
+                    </Button>
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      variant="contained"
                       color="error"
                       size="small"
                       startIcon={<DeleteForeverIcon />}
@@ -96,27 +118,7 @@ const BookIndex = () => {
 
       {selectedBook && (
         <Modal open>
-          <Box
-            sx={{
-              position: "absolute" as "absolute",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              width: 400,
-              bgcolor: "lightblue",
-              p: 4,
-              borderRadius: "0.5em",
-            }}
-          >
-            <Box component="p">ID: {selectedBook.id}</Box>
-            <Box component="p">Title: {selectedBook.title}</Box>
-            <Box component="p">Body: {selectedBook.body}</Box>
-            <Box component="p">CreatedAt: {selectedBook.created_at}</Box>
-            <Box component="p">UpdatedAt: {selectedBook.updated_at}</Box>
-            <Button onClick={() => handleShowDetails()} variant="contained">
-              Close ✖️
-            </Button>
-          </Box>
+          <Box /* モーダルの表示 */></Box>
         </Modal>
       )}
     </>
@@ -124,4 +126,3 @@ const BookIndex = () => {
 };
 
 export default BookIndex;
-
